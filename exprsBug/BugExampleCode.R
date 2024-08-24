@@ -15,9 +15,13 @@ library(flowWorkspace)
 library(purrr)
 
 # I loaded the .fcs files to the Cytoset
-path <- file.path("C:", "Users", "12692", "Desktop", "CytekBeads")
+path <- file.path("C:", "Users", "DavidRach", "Desktop", "CytekBeads")
 files <- list.files(path=path, pattern=".fcs", full.names=TRUE, recursive = TRUE)
 system.time({MyCytoSet <- load_cytoset_from_fcs(files, truncate_max_range = FALSE, transform = FALSE)})
+
+# Minimal Reproducible Example for the error requires both badly named files. 
+Here <- subset(MyCytoSet, name == "18 before.fcs"|name == "18 Before.fcs")
+exprs(Here[[2]])
 
 # Encountered the bug when mapping the 548 files to a QC_function
 pData(MyCytoSet)
@@ -34,8 +38,11 @@ TheLowerCaseValues <- Values %>% dplyr::filter(str_detect(name, "18 before"))
 TheUpperCaseValues <- Values %>% dplyr::filter(str_detect(name, "18 Before"))
 TheUpperCaseValues
 
+# name.keyword doesn't appear to be working for load_cytoset_from_fcs
 MyCytoSet <- load_cytoset_from_fcs(files[c(1:548)], name.keyword="$DATE", truncate_max_range = FALSE, transform = FALSE)
 pData(MyCytoSet)
 
 MyCytoSet <- load_cytoset_from_fcs(files[c(1:548)], name.keyword="GROUPNAME", truncate_max_range = FALSE, transform = FALSE)
 pData(MyCytoSet)
+
+
