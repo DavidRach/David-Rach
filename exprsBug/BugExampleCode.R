@@ -1,7 +1,6 @@
 # Background: Working on a function for quality control monitoring of our spectral flow cytometer. 
 # We acquire 3000-5000 QC beads before and after running daily automated QC to evaluate changes in MFI over time. 
-# I was mapping over the 548 .fcs files in the Cytoset and encountered these two files which threw the specific error in question.
-# Both files were acquired on the 18th of their respective month. But we have other .fcs files acquired same date and on 18th's with no issue. 
+# I was mapping over the 548 .fcs files in the Cytoset and encountered these two files which threw the specific error in question. 
 
 #  error #000: in H5Dread(): line 184
 #        major: Invalid arguments to routine
@@ -29,3 +28,14 @@ Biobase::exprs(MyCytoSet[[7]])
 keyword(MyCytoSet[[106]], "$DATE")
 flowCore::exprs(MyCytoSet[[106]])
 Biobase::exprs(MyCytoSet[[106]])
+
+Values <- data.frame(name=pData(MyCytoSet)$name, check.names = FALSE)
+TheLowerCaseValues <- Values %>% dplyr::filter(str_detect(name, "18 before"))
+TheUpperCaseValues <- Values %>% dplyr::filter(str_detect(name, "18 Before"))
+TheUpperCaseValues
+
+MyCytoSet <- load_cytoset_from_fcs(files[c(1:548)], name.keyword="$DATE", truncate_max_range = FALSE, transform = FALSE)
+pData(MyCytoSet)
+
+MyCytoSet <- load_cytoset_from_fcs(files[c(1:548)], name.keyword="GROUPNAME", truncate_max_range = FALSE, transform = FALSE)
+pData(MyCytoSet)
