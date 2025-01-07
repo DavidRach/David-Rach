@@ -1,0 +1,183 @@
+---
+format:
+  dashboard:
+    orientation: columns
+aliases: 
+  - home.html
+project:
+  output-dir: docs/
+filters: 
+  - shinylive
+---
+
+## {.sidebar}
+Dashboard data last updated on `r TheDate`
+
+## First {width="30%"}
+
+### Row {height="50%"}
+
+#### Column
+
+```{r}
+#| content: valuebox
+#| title: "3L"
+#| icon: cup-hot
+```
+
+#### Column
+
+```{r}
+#| content: valuebox
+#| title: "4L"
+#| icon: cup-hot
+
+```
+
+### Row  {height="50%"}
+
+#### Column
+
+```{r}
+#| content: valuebox
+#| title: "5L"
+#| icon: cup-hot
+
+```
+
+#### Column {scrolling=FALSE}
+
+```{r}
+#| content: valuebox
+#| title: "CS"
+#| icon: cup-hot
+
+```
+
+## Second {.tabset}
+```{r}
+#| title: 3L
+print("Hello")
+```
+
+```{r}
+#| title: 4L
+print("Hello")
+```
+
+```{r}
+#| title: 5L
+print("Hello")
+```
+
+```{r}
+#| title: CS
+print("Hello")
+```
+
+```{r}
+#| echo: false
+#| include: false
+library(shinylive)
+```
+
+```{shinylive-r}
+#| standalone: true
+#| viewerHeight: 450
+#| title: Historical
+
+webr::install("dplyr")
+webr::install("gt")
+
+library(shiny)
+library(dplyr)
+library(gt)
+
+ui <- fluidPage(
+  fluidRow(
+    column(6,
+           fluidRow(
+             column(12, align = "center",
+                    dateInput("date", label = "Select Date:", value = Sys.Date())
+             )
+           ),
+           fluidRow(
+             column(12, align = "center",
+                    actionButton("btn_3L", label = "3L"),
+                    actionButton("btn_4L", label = "4L"),
+                    actionButton("btn_5L", label = "5L"),
+                    actionButton("btn_CS", label = "CS")
+             )
+           ),
+           fluidRow(
+             column(12, align = "center",
+                    actionButton("render", label = "Render Output")
+             )
+           ),
+           # Output Section
+           fluidRow(
+             column(12,
+                    tableOutput("qc_table")
+             )
+           )
+    )
+  )
+)
+
+server <- function(input, output, session) {
+  
+  data_path <-                                                
+    paste(                                                  
+      "https://raw.githubusercontent.com",                  
+      "UMGCCFCSS", "InstrumentQC",                   
+      "main", "data", "HistoricalData.csv",                              
+      sep = "/"                                             
+    ) 
+  
+  Data <- read.csv(data_path, check.names = FALSE)
+  Data$Date <- as.Date(Data$Date) 
+  
+  function_path <-                                               
+    paste(                                                  
+      "https://raw.githubusercontent.com",                  
+      "DavidRach", "Luciernaga",                   
+      "master", "R", "DashboardHelpers.R",                              
+      sep = "/"                                             
+    )
+  source(function_path)
+  
+  selected_instrument <- reactiveVal()
+  
+  observeEvent(input$btn_3L, { selected_instrument("3L") })
+  observeEvent(input$btn_4L, { selected_instrument("4L") })
+  observeEvent(input$btn_5L, { selected_instrument("5L") })
+  observeEvent(input$btn_CS, { selected_instrument("CS") })
+
+  table_data <- eventReactive(input$render, {
+    req(input$date, selected_instrument())
+    
+    InstrumentSubset <- Data %>% filter(Instrument == selected_instrument())
+    DateSubset <- InstrumentSubset %>% filter(Date == input$date)
+    
+    if (nrow(DateSubset) > 0) {
+      TableData <- DateSubset %>% select(-Instrument, -Date)
+      SmallTable(data = TableData)
+    } else {
+      NULL
+    }
+  })
+
+  output$qc_table <- render_gt({
+    req(table_data())
+    table_data()
+  })
+}
+
+app <- shinyApp(ui = ui, server = server)
+```
+
+## Third {.tabset}{width="40%"}
+```{r}
+#| title: History
+print("Hello")
+```
