@@ -4,4 +4,4 @@ The regular R code-chunks for the tabset use "#\| title:" for naming, but this d
 
 ![](TabsetNames.png)
 
-For a minimal reproducible example, see the index.qmd file within this folder, it contains the same formatting of the webpage plus the self-contained shinylive chunk.
+For a minimal reproducible example, see the ReproducibleExample.qmd file within this folder, it contains the same formatting of the webpage plus the self-contained shinylive chunk.
